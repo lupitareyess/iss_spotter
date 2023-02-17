@@ -35,12 +35,29 @@ const fetchMyIP = function(callback) {
 };
 
 
-module.exports = { fetchMyIP };
-
-
-
-
-
 // 2. Fetch the geo coordinates for our IP
 
+const fetchCoordsByIP = function(IP, callback) {
+  request(`http://ipwho.is/${IP}`, (error, response, body) => {
+    if (error) {
+      return callback(error, null);
+    }
+
+    //parse body to check its info
+    // does not send non-200 error code
+    const parsedBody = JSON.parse(body);
+    if (!parsedBody.success) {
+      const msg = `Success status was ${parsedBody.success}. Server message says: ${parsedBody.message} when fetching for IP ${parsedBody.ip}`;
+      return callback(Error(msg), null);
+    }
+
+    const { latitude, longitude } = parsedBody;
+
+    callback(null, { latitude, longitude });
+  });
+
+};
+
+
 // 3. Fetch the next ISS flyovers for out geo coordinates
+module.exports = { fetchCoordsByIP };
